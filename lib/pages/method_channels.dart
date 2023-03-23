@@ -12,14 +12,14 @@ class MethodChannels extends StatefulWidget {
 
 class _MethodChannelsState extends State<MethodChannels> {
   static const platform = MethodChannel('rv.interview.sandbox/device');
-  String _deviceName = 'INVALID';
+  String _deviceName = 'Not Loaded';
 
   Future<void> _getDeviceName() async {
     String deviceName;
 
     try {
       final String result = await platform.invokeMethod('getDeviceName');
-      deviceName = 'Device Name:\n$result';
+      deviceName = result;
     } on PlatformException catch (e) {
       deviceName = "READ DEVICE NAME ERROR: ${e.message}.";
     } catch (e) {
@@ -54,12 +54,25 @@ class _MethodChannelsState extends State<MethodChannels> {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                const Text("Home"),
+                Padding(
+                    padding: EdgeInsets.all(40),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text("Device Name: ",
+                            textAlign: TextAlign.right,
+                            style: TextStyle(fontWeight: FontWeight.bold)),
+                        Text(
+                          _deviceName,
+                          textAlign: TextAlign.right,
+                        )
+                      ],
+                    )),
                 ElevatedButton(
                   onPressed: () => _getDeviceName(),
                   child: const Text("Load Device Name"),
                 ),
-                Text(_deviceName),
+                SizedBox(height: 50),
                 ElevatedButton(
                   onPressed: () => _addVoiceShortcut(),
                   child: const Text("Add Voice Shortcut"),

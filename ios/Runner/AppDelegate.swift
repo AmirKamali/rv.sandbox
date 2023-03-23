@@ -32,8 +32,11 @@ import Flutter
 }
 
 private func getDeviceName(result: FlutterResult) {
-    let device = UIDevice.current
-    result(device.name)
+    result("Device Name Not Working")
+
+
+    // let device = UIDevice // TODO: breaking for some reason, should return device name
+    // result(device.name)
 }
 
 private func addSiriShortcut(result: @escaping FlutterResult, controller: FlutterViewController) {
