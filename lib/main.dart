@@ -1,13 +1,21 @@
 import 'package:flutter/material.dart';
-import 'package:roadvault_interview_sandbox/pages/index.dart';
+import 'components/appRouter.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(MyApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+class MyApp extends StatefulWidget {
+  MyApp({Key? key}) : super(key: key) {}
 
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  _MyAppState() {
+    AppRouter();
+  }
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
@@ -17,11 +25,7 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
       ),
       initialRoute: '/',
-      routes: {
-        '/': (context) => const MethodChannels(),
-        '/record': (context) => const HttpActions(),
-        '/watch': (context) => const Watch(),
-      },
+      onGenerateRoute: AppRouter.generateRoute,
     );
   }
 }

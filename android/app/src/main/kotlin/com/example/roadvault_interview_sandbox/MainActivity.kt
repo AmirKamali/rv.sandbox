@@ -5,12 +5,15 @@ import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
 
 class MainActivity: FlutterActivity() {
+    val deviceNameMethodCall = "getDeviceName"
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "rv.interview.sandbox/device")
             .setMethodCallHandler { call, result ->
                 // TODO: only result the device name if the call.method is 'getDeviceName'
-                result.success(getDeviceName())
+                if (call.method == deviceNameMethodCall) {
+                    result.success(getDeviceName())
+                }
             }
     }
 }

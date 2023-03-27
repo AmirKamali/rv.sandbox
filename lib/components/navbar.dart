@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:roadvault_interview_sandbox/utils/nav.dart';
+
+import '../utils/nav.dart';
 
 final AppBar appBar = AppBar();
 
@@ -30,13 +31,13 @@ class NavBar extends StatelessWidget implements PreferredSizeWidget {
         leading: IconButton(
             icon: const Icon(Icons.arrow_back),
             onPressed: () {
-              if (hasBack()) pushTo(context, back!);
+              if (hasBack()) pushTo(context, back!, isForward: false);
             }),
         actions: [
           IconButton(
               icon: const Icon(Icons.arrow_forward),
               onPressed: () {
-                if (hasForward()) pushTo(context, forward!);
+                if (hasForward()) pushTo(context, forward!, isForward: true);
               })
         ]);
   }

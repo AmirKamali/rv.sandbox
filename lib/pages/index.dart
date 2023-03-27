@@ -1,3 +1,3 @@
-export 'method_channels.dart';
-export 'watch.dart';
-export 'http_actions.dart';
+export 'method_channels_page.dart';
+export 'watch_page.dart';
+export 'http_actions_page.dart';

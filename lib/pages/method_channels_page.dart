@@ -1,18 +1,38 @@
 import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
-import 'package:roadvault_interview_sandbox/components/index.dart';
 
-class MethodChannels extends StatefulWidget {
-  const MethodChannels({Key? key}) : super(key: key);
+import '../components/navbar.dart';
+
+class MethodChannelsPage extends StatefulWidget {
+  MethodChannelsPage({Key? key}) : super(key: key);
+  String _deviceName = 'Not Loaded';
 
   @override
-  State<MethodChannels> createState() => _MethodChannelsState();
+  State<MethodChannelsPage> createState() => _MethodChannelsPageState();
 }
 
-class _MethodChannelsState extends State<MethodChannels> {
+class _MethodChannelsPageState extends State<MethodChannelsPage> {
   static const platform = MethodChannel('rv.interview.sandbox/device');
-  String _deviceName = 'Not Loaded';
+  void navigateToPage(String page) {
+    print("navigating to $page");
+    Navigator.of(context).pushNamed(page);
+  }
+
+  _MethodChannelsPageState() {
+    platform.setMethodCallHandler((methodCall) {
+      print('NATIVE CALL...');
+      print(methodCall.method + '(' + methodCall.arguments + ')');
+      switch (methodCall.method) {
+        case "navigate":
+          navigateToPage(methodCall.arguments);
+          break;
+        default:
+          break;
+      }
+      return Future.value(true);
+    });
+  }
 
   Future<void> _getDeviceName() async {
     String deviceName;
@@ -28,7 +48,7 @@ class _MethodChannelsState extends State<MethodChannels> {
     }
 
     setState(() {
-      _deviceName = deviceName;
+      widget._deviceName = deviceName;
     });
   }
 
@@ -54,28 +74,28 @@ class _MethodChannelsState extends State<MethodChannels> {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Padding(
-                    padding: EdgeInsets.all(40),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text("Device Name: ",
-                            textAlign: TextAlign.right,
-                            style: TextStyle(fontWeight: FontWeight.bold)),
-                        Text(
-                          _deviceName,
-                          textAlign: TextAlign.right,
-                        )
-                      ],
-                    )),
                 ElevatedButton(
                   onPressed: () => _getDeviceName(),
                   child: const Text("Load Device Name"),
                 ),
-                SizedBox(height: 50),
+                Padding(
+                    padding: const EdgeInsets.only(top: 10),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Text("Device Name: ",
+                            textAlign: TextAlign.right,
+                            style: TextStyle(fontWeight: FontWeight.bold)),
+                        Text(
+                          widget._deviceName,
+                          textAlign: TextAlign.right,
+                        )
+                      ],
+                    )),
+                const SizedBox(height: 150),
                 ElevatedButton(
                   onPressed: () => _addVoiceShortcut(),
-                  child: const Text("Add Voice Shortcut"),
+                  child: const Text("Add Siri Shortcut"),
                 ),
               ])),
     );

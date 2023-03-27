@@ -1,39 +1,46 @@
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
-import 'package:roadvault_interview_sandbox/components/pictureViewer.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 
-class CameraViewer extends StatefulWidget {
-  const CameraViewer({Key? key}) : super(key: key);
+import 'pictureViewer.dart';
 
+class CameraViewer extends StatefulWidget with WidgetsBindingObserver {
+  CameraController? _controller;
+  XFile? pictureXfile;
+  bool _initialized = false;
+  CameraViewer({Key? key}) : super(key: key);
+  late Function onNewCameraSelected;
   @override
   State<CameraViewer> createState() => _CameraViewerState();
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState appState) {
+    super.didChangeAppLifecycleState(appState);
+
+    final CameraController? cameraController = _controller;
+
+    // App state changed before we got the chance to initialize.
+    if (cameraController == null || !cameraController.value.isInitialized) {
+      return;
+    }
+    // Respond to App states
+    if (appState == AppLifecycleState.inactive) {
+      cameraController.dispose();
+      _initialized = false;
+    } else if (appState == AppLifecycleState.resumed) {
+      onNewCameraSelected(cameraController.description);
+    }
+  }
 }
 
 class _CameraViewerState extends State<CameraViewer> {
-  late CameraController _controller;
   late List<CameraDescription> _cameras;
-  bool _initialized = false;
 
-  Future<void> setupCameras() async {
-    _cameras = await availableCameras();
-    final controller =
-        CameraController(_cameras[0], ResolutionPreset.ultraHigh);
-    await controller.initialize();
-    setState(() {
-      _initialized = true;
-      _controller = controller;
-    });
-  }
-
-  Future<void> _takePicture() async {
-    final XFile picture_xfile = await _controller.takePicture();
-    print("THIS IS A PICTURE FILE, IT'S QUITE COOL" + picture_xfile.path);
-    return;
-  }
+  bool _isProcessing = false;
 
   @override
   void initState() {
     setupCameras();
+    widget.onNewCameraSelected = () => {setupCameras()};
     super.initState();
   }
 
@@ -44,20 +51,60 @@ class _CameraViewerState extends State<CameraViewer> {
       Container(
           height: screen.height,
           width: screen.width,
-          decoration: BoxDecoration(color: Colors.black),
-          child: _initialized
-              ? CameraPreview(_controller)
+          decoration: const BoxDecoration(color: Colors.black),
+          child: widget._initialized
+              ? CameraPreview(widget._controller!)
               : const Text("Loading Camera")),
       Align(
           alignment: Alignment.bottomRight,
           child: Padding(
-              padding: EdgeInsets.all(20),
+              padding: const EdgeInsets.all(20),
               child: FloatingActionButton(
-                  onPressed: () => _takePicture(),
+                  onPressed: () async => _takePicture(),
                   child: const Icon(Icons.add_a_photo)))),
       Align(
           alignment: Alignment.bottomLeft,
-          child: Padding(padding: EdgeInsets.all(20), child: PictureViewer()))
+          child: Padding(
+              padding: EdgeInsets.all(20),
+              child: PictureViewer(widget.pictureXfile?.path))),
+      _isProcessing
+          ? const SpinKitDoubleBounce(
+              color: Colors.red,
+              size: 50.0,
+            )
+          : const SizedBox(
+              height: 0,
+              width: 0,
+            )
     ]);
+  }
+
+  Future<void> setupCameras() async {
+    _cameras = await availableCameras();
+    widget._controller =
+        CameraController(_cameras[0], ResolutionPreset.ultraHigh);
+    await widget._controller?.initialize();
+    setState(() {
+      widget._initialized = true;
+    });
+  }
+
+  Future<void> _takePicture() async {
+    // avoid multiple taps
+    if (_isProcessing) {
+      return;
+    }
+    // Set state and trigger loading
+    setState(() {
+      _isProcessing = true;
+    });
+    widget.pictureXfile = await widget._controller?.takePicture();
+    // Set state to ready to take the next picture
+    setState(() {
+      _isProcessing = false;
+    });
+    print("THIS IS A PICTURE FILE, IT'S QUITE COOL" +
+        (widget.pictureXfile?.path ?? ""));
+    return;
   }
 }
